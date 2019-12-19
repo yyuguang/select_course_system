@@ -1,0 +1,9 @@
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: url("../images/login/bj.jpg");
+    height: 100%;
+}

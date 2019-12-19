@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+              http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+              http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!--配置controller扫描-->
+    <context:component-scan base-package="com.lnzz.controller"/>
+    <!-- 静态资源访问 -->
+    <mvc:resources location="/static/" mapping="/static/**"/>
+    <!-- 注解驱动 -->
+    <mvc:annotation-driven/>
+    <!-- 后台访问拦截器 -->
+    <mvc:interceptors>
+        <!--在这里把拦截器的全类名声明好，结果问题解决了-->
+        <bean class="com.lnzz.interceptor.LoginInterceptor"/>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/login/login"/>
+            <bean class="com.lnzz.interceptor.LoginInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+
+    <!--处理静态资源-->
+    <mvc:default-servlet-handler/>
+
+    <mvc:annotation-driven >
+        <mvc:message-converters register-defaults="true">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes" value="text/plain;charset=UTF-8" />
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <mvc:resources location="static/images" mapping="/images/**"/>
+    <mvc:resources location="static/js/" mapping="/js/**"/>
+    <mvc:resources location="static/css/" mapping="/css/**"/>
+
+
+
+    <!-- 配置多媒体解析器 -->
+    <!-- 注意：这里的id只能是multipartResolver -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 设定默认编码 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 设定文件上传的最大值5MB，5*1024*1024 -->
+        <property name="maxUploadSize" value="5242880"/>
+    </bean>
+
+    <!--请求返回两种数据，json和页面-->
+    <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"></bean>
+    <!--定义RequestMapping竹节虾的类以json格式返回数据-->
+    <bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"></bean>
+
+    <!-- 配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>

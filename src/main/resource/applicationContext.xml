@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <!--指定连接池配置-->
+    <!-- dao层 数据库连接部分-->
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!-- 配置service扫描 -->
+    <context:component-scan base-package="com.lnzz.service"/>
+
+    <!-- 数据库连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <!-- 连接池的最大数据库连接数 -->
+        <property name="maxActive" value="10"/>
+        <!-- 最大空闲数 -->
+        <property name="maxIdle" value="5"/>
+    </bean>
+    <!-- spring整合JPA -->
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!--指定JPA扫描的实体类所在的包-->
+        <property name="packagesToScan" value="com.lnzz.pojo" />
+        <!-- 指定持久层提供者为Hibernate -->
+        <property name="persistenceProvider">
+            <bean class="org.hibernate.ejb.HibernatePersistence" />
+        </property>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <!-- 自动建表 -->
+                <property name="generateDdl" value="true" />
+                <property name="database" value="MYSQL" />
+                <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect" />
+                <property name="showSql" value="true" />
+            </bean>
+        </property>
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+        </property>
+    </bean>
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <!-- 开启事务注解 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <!--指定Spring Data JPA要进行扫描的包,该包中的类框架会自动为其创建代理-->
+    <jpa:repositories base-package="com.lnzz.dao" />
+
+</beans>
